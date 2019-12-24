@@ -9,17 +9,9 @@ namespace Multithreading
 	{
 		static void Main(string[] args)
 		{
-
+			PrintProcessingResults();
 		}
 
-		/// <summary>
-		/// Cook in sequential and parallel form then print the elapsed time.
-		/// </summary>
-		private static void Cook()
-		{
-			PrintElapsedTime(SequentialExecution);
-			PrintElapsedTime(ParallelExecution);
-		}
 
 		/// <summary>
 		/// Prints the elapsed time from action execution
@@ -36,6 +28,58 @@ namespace Multithreading
 			Console.WriteLine($"\n{action.Method.Name}");
 			Console.WriteLine($"Elapsed Time: {stopWatch.ElapsedMilliseconds} ms\n");
 		}
+
+		#region Parallel For 
+
+		/// <summary>
+		/// Execute processing in sequential and parallel and show the results
+		/// </summary>
+		static void PrintProcessingResults()
+		{
+			PrintElapsedTime(SequentiallyProcess);
+			PrintElapsedTime(ParallelProcess);
+		}
+
+		/// <summary>
+		/// Process from 0 to 100 (Exclusive) in parallely
+		/// </summary>
+		static void ParallelProcess() => Parallel.For(0, 100, (i) => ProcessValue(i));
+
+		/// <summary>
+		/// Process from 0 to 100 (Exclusive) sequentially
+		/// </summary>
+		static void SequentiallyProcess()
+		{
+			for (int i = 0; i < 100; i++)
+			{
+				ProcessValue(i);
+			}
+		}
+
+		/// <summary>
+		/// Prints when the value starts to be processed and finish its process
+		/// </summary>
+		/// <param name="value">Value to process</param>
+		static void ProcessValue(int value)
+		{
+			Console.WriteLine($"Starting to process {value} value");
+			Thread.Sleep(100);
+			Console.WriteLine($"Finishing to process {value} value");
+		}
+
+		#endregion
+
+		#region Parallel Invoke
+
+		/// <summary>
+		/// Cook in sequential and parallel form then print the elapsed time.
+		/// </summary>
+		private static void Cook()
+		{
+			PrintElapsedTime(SequentialExecution);
+			PrintElapsedTime(ParallelExecution);
+		}
+
 
 		/// <summary>
 		/// Cooks in parallel.
@@ -87,5 +131,7 @@ namespace Multithreading
 			Console.WriteLine("The Sauce is done!");
 			Console.WriteLine();
 		}
+
+		#endregion
 	}
 }
