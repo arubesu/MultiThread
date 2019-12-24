@@ -9,7 +9,28 @@ namespace Multithreading
 	{
 		static void Main(string[] args)
 		{
-			PrintProcessingResults();
+
+			BreakingParalellFor(80);
+		}
+
+		/// <summary>
+		/// Breaks the parallel loop from input number
+		/// </summary>
+		/// <param name="number">Number to break loop</param>
+		private static void BreakingParalellFor(int number = -1)
+		{
+			var loopResult = Parallel.For(0, 100, (int i, ParallelLoopState state) =>
+			{
+				if (i == number)
+				{
+					state.Break();
+				}
+
+				ProcessValue(i);
+			});
+
+			Console.WriteLine($"Success Executed All itens ? {loopResult.IsCompleted}\n");
+			Console.WriteLine($"Lowest Break Iteration :  {loopResult.LowestBreakIteration}\n");
 		}
 
 
