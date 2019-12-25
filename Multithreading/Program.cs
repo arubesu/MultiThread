@@ -54,13 +54,13 @@ namespace Multithreading
 		private static void ContinuousTask()
 		{
 			Task task = Task.Run(() => Hello());
-			
+
 			//Execute task if not on faulted
-			task.ContinueWith((tarefaAnterior) => World(),
+			task.ContinueWith((previousTask) => World(),
 				TaskContinuationOptions.NotOnFaulted);
 
 			//This task only is executed on faulted
-			task.ContinueWith((tarefaAnterior) => Error(tarefaAnterior),
+			task.ContinueWith((previousTask) => Error(previousTask),
 				TaskContinuationOptions.OnlyOnFaulted);
 		}
 
