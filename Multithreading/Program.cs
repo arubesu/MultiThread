@@ -1,5 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,30 +13,22 @@ namespace Multithreading
 	{
 		static void Main(string[] args)
 		{
-
-			BreakingParalellFor(80);
+			PrintElapsedTime(PrintPokemonNames);
+			PrintElapsedTime(() => PrintPokemonNamesWithForcedParallelism());
 		}
 
 		/// <summary>
-		/// Breaks the parallel loop from input number
+		/// Retrieves the list of Pokemons
 		/// </summary>
-		/// <param name="number">Number to break loop</param>
-		private static void BreakingParalellFor(int number = -1)
-		{
-			var loopResult = Parallel.For(0, 100, (int i, ParallelLoopState state) =>
-			{
-				if (i == number)
-				{
-					state.Break();
-				}
+		/// <returns></returns>
+		private static List<Pokemon> GetPokemons() =>
+			JsonConvert.DeserializeObject<List<Pokemon>>(GetPokedexJson());
 
-				ProcessValue(i);
-			});
-
-			Console.WriteLine($"Success Executed All itens ? {loopResult.IsCompleted}\n");
-			Console.WriteLine($"Lowest Break Iteration :  {loopResult.LowestBreakIteration}\n");
-		}
-
+		/// <summary>
+		/// Retrives pokedex JSON
+		/// </summary>
+		/// <returns></returns>
+		private static string GetPokedexJson() => File.ReadAllText("../../../../Pokedex.json");
 
 		/// <summary>
 		/// Prints the elapsed time from action execution
@@ -49,6 +45,49 @@ namespace Multithreading
 			Console.WriteLine($"\n{action.Method.Name}");
 			Console.WriteLine($"Elapsed Time: {stopWatch.ElapsedMilliseconds} ms\n");
 		}
+
+		#region Parallel Linq
+
+		/// <summary>
+		/// Print the pokemon names with forced parallelism
+		/// </summary>
+		/// <param name="degree">Degree of parallelism</param>
+		private static void PrintPokemonNamesWithForcedParallelism(int degree = 4)
+		{
+			var pokemons =
+										from p in
+											GetPokemons()
+											.AsParallel()
+											.WithExecutionMode(ParallelExecutionMode.ForceParallelism)
+											.WithDegreeOfParallelism(degree)
+										select new
+										{
+											Id = p.Id,
+											Name = p.Name.English
+										};
+
+			foreach (var pokemon in pokemons)
+				Console.WriteLine($"Pokemon : {pokemon.Name}");
+		}
+
+		/// <summary>
+		/// Print the pokemon English Names
+		/// </summary>
+		private static void PrintPokemonNames()
+		{
+			var pokemons =
+							from p in GetPokemons()
+							select new
+							{
+								Id = p.Id,
+								Name = p.Name.English
+							};
+
+			foreach (var pokemon in pokemons)
+				Console.WriteLine($"Pokemon : {pokemon.Name}");
+		}
+
+		#endregion
 
 		#region Parallel For 
 
@@ -86,6 +125,26 @@ namespace Multithreading
 			Console.WriteLine($"Starting to process {value} value");
 			Thread.Sleep(100);
 			Console.WriteLine($"Finishing to process {value} value");
+		}
+
+		/// <summary>
+		/// Breaks the parallel loop from input number
+		/// </summary>
+		/// <param name="number">Number to break loop</param>
+		private static void BreakingParalellFor(int number = -1)
+		{
+			var loopResult = Parallel.For(0, 100, (int i, ParallelLoopState state) =>
+			{
+				if (i == number)
+				{
+					state.Break();
+				}
+
+				ProcessValue(i);
+			});
+
+			Console.WriteLine($"Success Executed All itens ? {loopResult.IsCompleted}\n");
+			Console.WriteLine($"Lowest Break Iteration :  {loopResult.LowestBreakIteration}\n");
 		}
 
 		#endregion
