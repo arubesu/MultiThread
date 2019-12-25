@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
+using System.IO; 
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,8 +13,31 @@ namespace Multithreading
 	{
 		static void Main(string[] args)
 		{
-			PrintElapsedTime(PrintPokemonNames);
-			PrintElapsedTime(() => PrintPokemonNamesWithForcedParallelism());
+			WaitingAllTasksFinish();
+		}
+
+		private static void WaitingAllTasksFinish()
+		{
+			Console.WriteLine("Threads Count:");
+			Console.WriteLine(Process.GetCurrentProcess().Threads.Count);
+
+			Task[] tasks = new Task[10];
+
+			for (int i = 0; i < 10; i++)
+			{
+				//Keeps the runner number in local variable to fix running condition
+				// If don't keep this value the i variable starts with 10 value
+				int runnerNumber = i;
+
+				Task task = Task.Run(() => Run(runnerNumber));
+				tasks[i] = task;
+			}
+
+			//Wait all tasks finish
+			Task.WaitAll(tasks);
+
+			Console.WriteLine("Número de threads:");
+			Console.WriteLine(Process.GetCurrentProcess().Threads.Count);
 		}
 
 		/// <summary>
@@ -45,6 +68,22 @@ namespace Multithreading
 			Console.WriteLine($"\n{action.Method.Name}");
 			Console.WriteLine($"Elapsed Time: {stopWatch.ElapsedMilliseconds} ms\n");
 		}
+
+		#region Waiting tasks
+
+		/// <summary>
+		/// Process the runner run
+		/// </summary>
+		/// <param name="runnerNumber">The Runner number</param>
+		public static void Run(int runnerNumber)
+		{
+			Console.WriteLine("Runner {0} run", runnerNumber);
+
+			Thread.Sleep(1000);
+			Console.WriteLine("Corredor {0} finished", runnerNumber);
+		}
+
+		#endregion
 
 		#region Parallel Linq
 
