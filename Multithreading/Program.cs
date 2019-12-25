@@ -13,32 +13,8 @@ namespace Multithreading
 	{
 		static void Main(string[] args)
 		{
-			WaitingAllTasksFinish();
 		}
 
-		private static void WaitingAllTasksFinish()
-		{
-			Console.WriteLine("Threads Count:");
-			Console.WriteLine(Process.GetCurrentProcess().Threads.Count);
-
-			Task[] tasks = new Task[10];
-
-			for (int i = 0; i < 10; i++)
-			{
-				//Keeps the runner number in local variable to fix running condition
-				// If don't keep this value the i variable starts with 10 value
-				int runnerNumber = i;
-
-				Task task = Task.Run(() => Run(runnerNumber));
-				tasks[i] = task;
-			}
-
-			//Wait all tasks finish
-			Task.WaitAll(tasks);
-
-			Console.WriteLine("Número de threads:");
-			Console.WriteLine(Process.GetCurrentProcess().Threads.Count);
-		}
 
 		/// <summary>
 		/// Retrieves the list of Pokemons
@@ -70,6 +46,41 @@ namespace Multithreading
 		}
 
 		#region Waiting tasks
+
+		/// <summary>
+		/// Process the race waiting all tasks
+		/// </summary>
+		private static void WaitingAllTasksFinish()
+		{
+			PrintThreadCount();
+
+			Task[] tasks = new Task[10];
+
+			for (int i = 0; i < 10; i++)
+			{
+				//Keeps the runner number in local variable to fix running condition
+				// If don't keep this value the i variable starts with 10 value
+				int runnerNumber = i;
+
+				Task task = Task.Run(() => Run(runnerNumber));
+				tasks[i] = task;
+			}
+
+			//Wait all tasks finish
+			Task.WaitAll(tasks);
+
+			PrintThreadCount();
+		}
+
+		/// <summary>
+		/// Prints the thread count
+		/// </summary>
+		private static void PrintThreadCount()
+		{
+			Console.WriteLine("Threads Count:");
+			Console.WriteLine(Process.GetCurrentProcess().Threads.Count);
+		}
+
 
 		/// <summary>
 		/// Process the runner run
