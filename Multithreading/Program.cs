@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO; 
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +13,7 @@ namespace Multithreading
 	{
 		static void Main(string[] args)
 		{
+			ContinuousTask();
 		}
 
 
@@ -46,6 +47,49 @@ namespace Multithreading
 		}
 
 		#region Waiting tasks
+
+		/// <summary>
+		/// Process tasks continuously
+		/// </summary>
+		private static void ContinuousTask()
+		{
+			Task task = Task.Run(() => Hello());
+			
+			//Execute task if not on faulted
+			task.ContinueWith((tarefaAnterior) => World(),
+				TaskContinuationOptions.NotOnFaulted);
+
+			//This task only is executed on faulted
+			task.ContinueWith((tarefaAnterior) => Error(tarefaAnterior),
+				TaskContinuationOptions.OnlyOnFaulted);
+		}
+
+		/// <summary>
+		/// Say World
+		/// </summary>
+		private static void World() => Console.WriteLine("World!");
+
+		/// <summary>
+		/// Say Hello
+		/// </summary>
+		private static void Hello()
+		{
+			Console.WriteLine("Hello");
+			throw new ApplicationException("Ops! An error ocourred!");
+		}
+
+		/// <summary>
+		/// Prints all innerExceptions from task
+		/// </summary>
+		/// <param name="task">Task</param>
+		private static void Error(Task task)
+		{
+			var exceptions = task.Exception.InnerExceptions;
+
+			foreach (var exception in exceptions)
+				Console.WriteLine(exception);
+		}
+
 
 		/// <summary>
 		/// Process the race waiting all tasks
