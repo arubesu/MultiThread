@@ -13,7 +13,6 @@ namespace Multithreading
 	{
 		static void Main(string[] args)
 		{
-			ContinuousTask();
 		}
 
 
@@ -45,6 +44,53 @@ namespace Multithreading
 			Console.WriteLine($"\n{action.Method.Name}");
 			Console.WriteLine($"Elapsed Time: {stopWatch.ElapsedMilliseconds} ms\n");
 		}
+
+		#region Threads
+
+		/// <summary>
+		/// Queue work itens in threads 
+		/// </summary>
+		/// <param name="length">Length</param>
+		static void QueueWorkItens(int length)
+		{
+
+			for (int i = 0; i < length; i++)
+			{
+				int itenState = i;
+				ThreadPool.QueueUserWorkItem((state)
+							=> ExecuteThreadWithParameter(itenState));
+			}
+		}
+
+		/// <summary>
+		/// Execute Thread With Parameter
+		/// </summary>
+		/// <param name="param">Parameter</param>
+		static void ExecuteThreadWithParameter(object param)
+		{
+			ShowThreadInformation(Thread.CurrentThread);
+			Console.WriteLine("Execution Start: {0}", param);
+			Thread.Sleep(1000);
+			Console.WriteLine("Execution End: {0}", param);
+		}
+
+		/// <summary>
+		/// Print Thread information
+		/// </summary>
+		/// <param name="thread">Thread</param>
+		static void ShowThreadInformation(Thread thread)
+		{
+			Console.WriteLine();
+			Console.WriteLine($"Name: {thread.Name}");
+			Console.WriteLine($"CurrentCulture: {thread.CurrentCulture}");
+			Console.WriteLine($"Priority: {thread.Priority}");
+			Console.WriteLine($"ExecutionContext: {thread.ExecutionContext}");
+			Console.WriteLine($"Is Background? {thread.IsBackground}");
+			Console.WriteLine($"Is Thread in Pool Thread? {thread.IsThreadPoolThread}");
+			Console.WriteLine();
+		}
+
+		#endregion
 
 		#region Waiting tasks
 
